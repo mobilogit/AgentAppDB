@@ -1,0 +1,12 @@
+# Visual Studio / VS Code
+.vs/
+.vscode/
+
+# build output
+bin/
+obj/
+publish/
+
+# lokalne ustawienia
+appsettings.json
+*.user

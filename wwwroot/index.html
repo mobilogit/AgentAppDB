@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Agents Special WebPage</title>
+  <style>
+    /* Center horizontally and push content down from top */
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20vh;    /* Move content down 20% of viewport height */
+      margin: 0;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Larger input and button for better usability */
+    input, button {
+      margin: 5px;
+      font-size: 1.2rem;    /* Bigger text */
+      padding: 10px 15px;   /* More padding */
+    }
+
+    input {
+      width: 300px;         /* Wider text box */
+    }
+  </style>
+</head>
+<body>
+  <!-- Welcome heading, now higher on the page -->
+  <h1>Welcome on Agents Special WebPage</h1>
+
+  <!-- Larger text input for the entry -->
+  <input
+    type="text"
+    id="textInput"
+    placeholder="Your text here"
+  />
+
+  <!-- Button to submit the entry -->
+  <button id="addBtn">Add</button>
+
+  <!-- Paragraph for status messages -->
+  <p id="status"></p>
+
+  <script src="app.js"></script>
+</body>
+</html>
