@@ -1,30 +1,30 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Data.SqlClient;    // SQL client
 
-// 1) build the host
 var builder = WebApplication.CreateBuilder(args);
 
-// 2) read the connection string
-var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
+// 1. read connection string named "DefaultConnection"
+var connStr = builder.Configuration.GetConnectionString("DefaultConnection")!;
 
-// 3) optional: enable directory browsing
-builder.Services.AddDirectoryBrowser();
+// 2. add services
+//    (static-file middleware is part of Microsoft.AspNetCore.App by default)
+builder.Services.AddRouting();
 
 var app = builder.Build();
 
-// 4) static file support (serves wwwroot/index.html + *.js, css, etc.)
-app.UseDefaultFiles();
-app.UseStaticFiles();
+// 3. configure middleware
+app.UseDefaultFiles();   // serves wwwroot/index.html
+app.UseStaticFiles();    // serves JS, CSS, images from wwwroot/
 
-// 5) JSON POST endpoint: accepts { "text": "…" }
+// 4. minimal JSON POST endpoint at /api/add
 app.MapPost("/api/add", async (AddDto dto) =>
 {
     if (string.IsNullOrWhiteSpace(dto.Text))
         return Results.BadRequest("Text cannot be empty");
 
+    // insert into SQL DB
     await using var conn = new SqlConnection(connStr);
     await conn.OpenAsync();
+
     await using var cmd = new SqlCommand(
         "INSERT INTO Entries (Text) VALUES (@text);", conn);
     cmd.Parameters.AddWithValue("@text", dto.Text);
@@ -33,10 +33,8 @@ app.MapPost("/api/add", async (AddDto dto) =>
     return Results.Ok(new { success = true });
 });
 
-// 6) start listening
+// 5. start the app
 app.Run();
 
-// --- any type declarations go *after* all the top-level code above ---
-
-// DTO for binding incoming JSON
+// 6. DTO type goes after all top-level statements
 record AddDto(string Text);
