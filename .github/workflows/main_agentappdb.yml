@@ -1,37 +1,66 @@
-name: Build and Deploy to Azure Web App
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy ASP.Net Core app to Azure Web App - AgentAppDB
 
 on:
   push:
     branches:
-      - main     # run on pushes to main branch
+      - main
+  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read #This is required for actions/checkout
 
     steps:
-      # 1. Checkout source code
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      # 2. Install .NET SDK
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'   # or '7.0.x' if you downgrade from net9
+          dotnet-version: 'v9.0'
 
-      # 3. Build & publish your project
-      - name: Publish .NET project
-        run: |
-          dotnet restore
-          dotnet publish MyWebApp.csproj \
-            --configuration Release \
-            --output publish
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
 
-      # 4. Deploy the 'publish' folder to Azure App Service
+      - name: dotnet publish
+        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+      
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_823B6DFC378D43CF99A0AA0A3D0D19C8 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_3E6A5D3C216C4A589B58A7C529AF619D }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AA4BAC1A5C1046A28AFE732FF101139B }}
+
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
         with:
-          app-name: my-dotnet9-app                # <–– your App Service name
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: publish
+          app-name: 'AgentAppDB'
+          slot-name: 'Production'
+          package: .
+          
