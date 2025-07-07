@@ -1,8 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
+
   <ItemGroup>
+    <!-- SQL client -->
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.0" />
   </ItemGroup>
 </Project>
