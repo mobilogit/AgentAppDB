@@ -1,40 +1,64 @@
-using Microsoft.Data.SqlClient;    // SQL client
+using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. read connection string named "DefaultConnection"
+// Wczytaj connection string z konfiguracji (np. z Azure App Service)
 var connStr = builder.Configuration.GetConnectionString("DefaultConnection")!;
 
-// 2. add services
-//    (static-file middleware is part of Microsoft.AspNetCore.App by default)
 builder.Services.AddRouting();
 
 var app = builder.Build();
 
-// 3. configure middleware
-app.UseDefaultFiles();   // serves wwwroot/index.html
-app.UseStaticFiles();    // serves JS, CSS, images from wwwroot/
+// Obsługa plików statycznych (np. index.html, app.js)
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
-// 4. minimal JSON POST endpoint at /api/add
+// Endpoint POST do dodawania wpisów
 app.MapPost("/api/add", async (AddDto dto) =>
 {
     if (string.IsNullOrWhiteSpace(dto.Text))
         return Results.BadRequest("Text cannot be empty");
 
-    // insert into SQL DB
-    await using var conn = new SqlConnection(connStr);
-    await conn.OpenAsync();
+    try
+    {
+        await using var conn = new SqlConnection(connStr);
+        await conn.OpenAsync();
 
-    await using var cmd = new SqlCommand(
-        "INSERT INTO Entries (Text) VALUES (@text);", conn);
-    cmd.Parameters.AddWithValue("@text", dto.Text);
-    await cmd.ExecuteNonQueryAsync();
+        await using var cmd = new SqlCommand(
+            "INSERT INTO Entries (Text) VALUES (@text);", conn);
+        cmd.Parameters.AddWithValue("@text", dto.Text);
+        await cmd.ExecuteNonQueryAsync();
 
-    return Results.Ok(new { success = true });
+        return Results.Ok(new { success = true });
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("DB ERROR (add): " + ex.ToString());
+        return Results.Problem("Database error: " + ex.Message);
+    }
 });
 
-// 5. start the app
+// Endpoint GET do testowania połączenia z bazą danych
+app.MapGet("/api/test-db-connection", async () =>
+{
+    try
+    {
+        await using var conn = new SqlConnection(connStr);
+        await conn.OpenAsync();
+
+        await using var cmd = new SqlCommand("SELECT 1", conn);
+        var result = await cmd.ExecuteScalarAsync();
+
+        return Results.Ok(new { connected = true, result });
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("DB ERROR (test): " + ex.ToString());
+        return Results.Problem("Database connection failed: " + ex.Message);
+    }
+});
+
 app.Run();
 
-// 6. DTO type goes after all top-level statements
+// DTO do odbierania danych z JSON-a
 record AddDto(string Text);
