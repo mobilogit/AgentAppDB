@@ -58,6 +58,28 @@ app.MapGet("/api/test-db-connection", async () =>
     }
 });
 
+// Endpoint GET do wyświetlania connection stringa (z zamaskowanym hasłem)
+app.MapGet("/api/show-connection-string", () =>
+{
+    try
+    {
+        var raw = connStr;
+
+        // Zamaskuj hasło
+        var masked = System.Text.RegularExpressions.Regex.Replace(
+            raw,
+            @"(?i)(Password|Pwd)\s*=\s*[^;]+",
+            "$1=*****"
+        );
+
+        return Results.Ok(new { connectionString = masked });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Could not read connection string: " + ex.Message);
+    }
+});
+
 app.Run();
 
 // DTO do odbierania danych z JSON-a
