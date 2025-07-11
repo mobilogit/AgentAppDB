@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ASP.Net Core app to Azure Web App - AgentDBapps
+name: Build and deploy ASP.Net Core app to Azure Web App - agentdbapps
 
 on:
   push:
@@ -52,15 +52,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_D12761118A6D40EAA9081D3E6E18C6B8 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_25541703FE8242C882D5119356158089 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_895FBB30D0824E0ABFBB452E95A8B45F }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_88283099968C49B8AC615E5F393AD337 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_59A3B3F63BD445CE8834F8327E4C8268 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2DC871368E61454ABF2F46FC9CCB2F7C }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'AgentDBapps'
+          app-name: 'agentdbapps'
           slot-name: 'Production'
           package: .
           
